@@ -1,0 +1,58 @@
+<%- include('../partials/head') %><%- include('../partials/navbar') %>
+<main class="container py-4">
+  <div class="row g-4">
+    <div class="col-5 col-md-3 col-lg-2"><img class="img-fluid rounded-4 shadow-sm w-100" src="<%= anime.coverUrl %>" alt="Capa de <%= anime.title %>"></div>
+    <div class="col-7 col-md-9 col-lg-10">
+      <div class="d-flex flex-wrap justify-content-between gap-3">
+        <div>
+          <h1 class="h2 fw-bold"><%= anime.title %></h1>
+          <% if(anime.originalTitle){ %><p class="text-secondary mb-2"><%= anime.originalTitle %></p><% } %>
+          <div class="d-flex flex-wrap gap-2 mb-3">
+            <% (anime.genres||[]).slice(0,10).forEach(g=>{ %><span class="badge text-bg-secondary"><%= g %></span><% }) %>
+            <% if(anime.status){ %><span class="badge text-bg-info"><%= anime.status %></span><% } %>
+          </div>
+        </div>
+        <% if(user){ %><button id="favoriteButton" class="btn <%= favorite?'btn-danger':'btn-outline-danger' %>" data-provider="jikan-anime" data-manga-id="<%= anime.id %>" data-title="<%= anime.title %>" data-cover="<%= anime.coverUrl %>"><i class="bi bi-heart<%= favorite?'-fill':'' %> me-1"></i><span><%= favorite?'Favoritado':'Favoritar' %></span></button><% } %>
+      </div>
+      <p class="text-secondary"><%= anime.synopsis || 'Sinopse indisponível.' %></p>
+      <div class="card border-0 bg-body-tertiary mt-3"><div class="card-body">
+        <div class="row g-2 small">
+          <% if(anime.score){ %><div class="col-6 col-md-3"><strong>Nota:</strong> <%= anime.score %>/10</div><% } %>
+          <% if(anime.year){ %><div class="col-6 col-md-3"><strong>Ano:</strong> <%= anime.year %></div><% } %>
+          <% if(anime.type){ %><div class="col-6 col-md-3"><strong>Tipo:</strong> <%= anime.type %></div><% } %>
+          <% if(anime.episodes){ %><div class="col-6 col-md-3"><strong>Episódios:</strong> <%= anime.episodes %></div><% } %>
+        </div>
+        <% if(anime.studios?.length){ %><div class="small mt-2"><strong>Estúdio:</strong> <%= anime.studios.join(', ') %></div><% } %>
+      </div></div>
+    </div>
+  </div>
+
+  <% if(anime.trailer?.embedUrl){ %>
+    <hr class="my-4">
+    <h2 class="h4 mb-3"><i class="bi bi-play-btn me-2"></i>Trailer</h2>
+    <div class="ratio ratio-16x9 rounded-4 overflow-hidden border anime-player"><iframe src="<%= anime.trailer.embedUrl %>" title="Trailer de <%= anime.title %>" allowfullscreen></iframe></div>
+  <% } %>
+
+  <hr class="my-4">
+  <div class="d-flex justify-content-between align-items-center mb-3">
+    <div><h2 class="h4 mb-0">Lista de episódios</h2><p class="small text-secondary mb-0">Jikan lista episódios, mas não fornece vídeo completo.</p></div>
+    <span class="text-secondary small"><%= anime.episodesList.length %> nesta página</span>
+  </div>
+
+  <div class="list-group">
+    <% anime.episodesList.forEach(ep=>{ %>
+      <a href="/anime/<%= encodeURIComponent(anime.id) %>/assistir/<%= encodeURIComponent(ep.id || ep.number) %>" class="list-group-item list-group-item-action d-flex justify-content-between align-items-center py-3">
+        <span><i class="bi bi-play-circle me-2"></i>Episódio <%= ep.number || ep.id %> — <%= ep.title %>
+          <% if(ep.hasConfiguredVideo){ %><span class="badge text-bg-primary ms-2">Vídeo</span><% } %>
+        </span>
+        <span class="small text-secondary"><%= ep.aired ? new Date(ep.aired).toLocaleDateString('pt-BR') : 'Sem data' %></span>
+      </a>
+    <% }) %>
+  </div>
+
+  <div class="d-flex justify-content-center gap-2 mt-4">
+    <% if(anime.episodesPage > 1){ %><a class="btn btn-outline-warning" href="/anime/<%= anime.id %>?epPage=<%= anime.episodesPage-1 %>">Episódios anteriores</a><% } %>
+    <% if(anime.episodesHasNextPage){ %><a class="btn btn-primary" href="/anime/<%= anime.id %>?epPage=<%= anime.episodesPage+1 %>">Mais episódios</a><% } %>
+  </div>
+</main>
+<%- include('../partials/footer') %>

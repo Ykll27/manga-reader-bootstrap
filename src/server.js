@@ -1,0 +1,9 @@
+const path=require('path'); const express=require('express'); const session=require('express-session'); const SQLiteStore=require('connect-sqlite3')(session); const helmet=require('helmet'); const rateLimit=require('express-rate-limit');
+const env=require('./config/env'); require('./config/database'); const authRoutes=require('./routes/authRoutes'); const siteRoutes=require('./routes/siteRoutes'); const apiRoutes=require('./routes/apiRoutes'); const {notFound,errorHandler}=require('./middleware/errors');
+const app=express(); app.disable('x-powered-by'); app.set('view engine','ejs'); app.set('views',path.join(process.cwd(),'views'));
+app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'",'https://cdn.jsdelivr.net'],styleSrc:["'self'",'https://cdn.jsdelivr.net',"'unsafe-inline'"],imgSrc:["'self'",'data:','https:'],fontSrc:["'self'",'https://cdn.jsdelivr.net'],connectSrc:["'self'"],frameSrc:["'self'",'https://www.youtube.com','https://www.youtube-nocookie.com']}}}));
+app.use(express.urlencoded({extended:false,limit:'20kb'})); app.use(express.json({limit:'100kb'})); app.use(express.static(path.join(process.cwd(),'public'),{maxAge:env.nodeEnv==='production'?'7d':0}));
+app.use(session({store:new SQLiteStore({db:'sessions.sqlite',dir:path.join(process.cwd(),'data')}),secret:env.sessionSecret,resave:false,saveUninitialized:false,cookie:{httpOnly:true,sameSite:'lax',secure:env.nodeEnv==='production',maxAge:1000*60*60*24*30}}));
+app.use((req,res,next)=>{res.locals.user=req.session.user||null; res.locals.currentPath=req.path; next();});
+app.use(['/login','/cadastro'],rateLimit({windowMs:15*60*1000,limit:30,standardHeaders:true,legacyHeaders:false})); app.use(authRoutes); app.use('/api',apiRoutes); app.use(siteRoutes); app.use(notFound); app.use(errorHandler);
+app.listen(env.port,()=>console.log(`Manga Reader em http://localhost:${env.port} | provider=${env.mangaProvider}`));

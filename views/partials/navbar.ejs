@@ -1,0 +1,23 @@
+<nav class="navbar navbar-expand-lg border-bottom sticky-top bg-body">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="/"><i class="bi bi-book-half me-2"></i>Kumo Reader</a>
+    <button class="navbar-toggler" data-bs-toggle="collapse" data-bs-target="#nav"><span class="navbar-toggler-icon"></span></button>
+    <div id="nav" class="collapse navbar-collapse">
+      <div class="navbar-nav ms-lg-4 my-2 my-lg-0">
+        <a class="nav-link <%= currentPath==='/'?'active':'' %>" href="/"><i class="bi bi-book me-1"></i>Mangás</a>
+        <a class="nav-link <%= currentPath.startsWith('/anime')||currentPath==='/animes'?'active':'' %>" href="/animes"><i class="bi bi-play-circle me-1"></i>Animes</a>
+      </div>
+      <div class="ms-auto d-flex gap-2 align-items-center py-2 py-lg-0">
+        <button id="themeButton" class="btn btn-outline-secondary" aria-label="Alternar tema"><i class="bi bi-moon-stars"></i></button>
+        <% if(user){ %>
+          <a class="btn btn-outline-light" href="/biblioteca"><i class="bi bi-collection me-1"></i>Biblioteca</a>
+          <% if(user.role==='admin'){ %><a class="btn btn-outline-warning" href="/admin">Admin</a><% } %>
+          <form method="post" action="/logout"><button class="btn btn-danger">Sair</button></form>
+        <% } else { %>
+          <a class="btn btn-outline-light" href="/login">Entrar</a>
+          <a class="btn btn-primary" href="/cadastro">Criar conta</a>
+        <% } %>
+      </div>
+    </div>
+  </div>
+</nav>

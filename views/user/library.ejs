@@ -1,0 +1,51 @@
+<%- include('../partials/head') %><%- include('../partials/navbar') %>
+<main class="container py-4">
+  <h1 class="h2 fw-bold mb-4">Minha biblioteca</h1>
+  <ul class="nav nav-pills mb-4" role="tablist">
+    <li class="nav-item"><button class="nav-link active" data-bs-toggle="pill" data-bs-target="#history">Continuar</button></li>
+    <li class="nav-item"><button class="nav-link" data-bs-toggle="pill" data-bs-target="#favorites">Favoritos</button></li>
+  </ul>
+
+  <div class="tab-content">
+    <section id="history" class="tab-pane fade show active">
+      <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-3">
+        <% history.forEach(x=>{ const isAnime = x.provider === 'jikan-anime'; const href = isAnime ? `/anime/${encodeURIComponent(x.manga_id)}/assistir/${encodeURIComponent(x.chapter_id)}` : `/ler/${x.provider}/${encodeURIComponent(x.manga_id)}/${encodeURIComponent(x.chapter_id)}`; %>
+          <div class="col">
+            <a class="card h-100 text-decoration-none" href="<%= href %>">
+              <div class="row g-0 h-100">
+                <div class="col-4"><img class="img-fluid rounded-start h-100 object-fit-cover" src="<%= x.cover_url %>" alt=""></div>
+                <div class="col-8">
+                  <div class="card-body">
+                    <span class="badge <%= isAnime ? 'text-bg-info' : 'text-bg-secondary' %> mb-2"><%= isAnime ? 'Anime' : 'Mangá' %></span>
+                    <h2 class="h6 text-body"><%= x.manga_title %></h2>
+                    <p class="small text-secondary"><%= x.chapter_title %></p>
+                    <span class="badge text-bg-primary">Continuar</span>
+                  </div>
+                </div>
+              </div>
+            </a>
+          </div>
+        <% }) %>
+      </div>
+      <% if(!history.length){ %><p class="text-secondary">Você ainda não iniciou nenhuma leitura ou episódio.</p><% } %>
+    </section>
+
+    <section id="favorites" class="tab-pane fade">
+      <div class="row row-cols-2 row-cols-md-4 row-cols-lg-6 g-3">
+        <% favorites.forEach(x=>{ const isAnime = x.provider === 'jikan-anime'; const href = isAnime ? `/anime/${encodeURIComponent(x.manga_id)}` : `/manga/${x.provider}/${encodeURIComponent(x.manga_id)}`; %>
+          <div class="col">
+            <a class="card manga-card h-100 text-decoration-none" href="<%= href %>">
+              <img class="card-img-top manga-cover" src="<%= x.cover_url %>" alt="">
+              <div class="card-body">
+                <span class="badge <%= isAnime ? 'text-bg-info' : 'text-bg-secondary' %> mb-2"><%= isAnime ? 'Anime' : 'Mangá' %></span>
+                <h2 class="h6 text-body"><%= x.title %></h2>
+              </div>
+            </a>
+          </div>
+        <% }) %>
+      </div>
+      <% if(!favorites.length){ %><p class="text-secondary">Nenhum favorito salvo.</p><% } %>
+    </section>
+  </div>
+</main>
+<%- include('../partials/footer') %>

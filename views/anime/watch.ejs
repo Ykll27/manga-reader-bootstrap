@@ -1,0 +1,130 @@
+<%- include('../partials/head') %>
+<header class="reader-controls position-sticky top-0 bg-body border-bottom py-2">
+  <div class="container d-flex justify-content-between align-items-center gap-2">
+    <a class="btn btn-outline-secondary" href="/anime/<%= anime.id %>"><i class="bi bi-arrow-left"></i></a>
+    <div class="text-center">
+      <strong><%= anime.title %></strong>
+      <div class="small text-secondary">Episódio <%= episode.number || episode.id %></div>
+    </div>
+    <button id="themeButton" class="btn btn-outline-secondary" aria-label="Alternar tema"><i class="bi bi-moon-stars"></i></button>
+  </div>
+</header>
+
+<main class="container py-4">
+  <% if(source && (source.type === 'mp4' || source.type === 'video')){ %>
+    <div class="ratio ratio-16x9 rounded-4 overflow-hidden border anime-player bg-black">
+      <video id="animeVideo" src="<%= source.url %>" controls playsinline preload="metadata" class="w-100 h-100"></video>
+    </div>
+  <% } else if(source && source.type === 'hls'){ %>
+    <div class="ratio ratio-16x9 rounded-4 overflow-hidden border anime-player bg-black">
+      <video id="animeVideo" data-hls-src="<%= source.url %>" controls playsinline preload="metadata" class="w-100 h-100"></video>
+    </div>
+    <script src="https://cdn.jsdelivr.net/npm/hls.js@1.5.20/dist/hls.min.js"></script>
+  <% } else if(source && source.type === 'embed'){ %>
+    <div class="ratio ratio-16x9 rounded-4 overflow-hidden border anime-player">
+      <iframe src="<%= source.url %>" title="<%= episode.title %>" allow="fullscreen; picture-in-picture" allowfullscreen></iframe>
+    </div>
+  <% } else if(anime.trailer?.embedUrl){ %>
+    <div class="alert alert-warning border-0 rounded-4">
+      <strong>Sem episódio completo configurado.</strong> Mostrando o trailer oficial disponível no catálogo.
+    </div>
+    <div class="ratio ratio-16x9 rounded-4 overflow-hidden border anime-player">
+      <iframe src="<%= anime.trailer.embedUrl %>" title="Trailer de <%= anime.title %>" allowfullscreen></iframe>
+    </div>
+  <% } else { %>
+    <div class="text-center border rounded-4 p-5 bg-body-tertiary">
+      <i class="bi bi-film display-4 text-warning"></i>
+      <h1 class="h4 mt-3">Episódio sem vídeo configurado</h1>
+      <p class="text-secondary mb-0">Adicione uma fonte própria/autorizada em <code>data/anime-sources.json</code>.</p>
+    </div>
+  <% } %>
+
+  <section class="card mt-4">
+    <div class="card-body">
+      <div class="d-flex flex-wrap justify-content-between gap-3">
+        <div>
+          <h1 class="h5 mb-1"><%= episode.title %></h1>
+          <p class="text-secondary mb-0">
+            <% if(source){ %>
+              Fonte configurada: <code><%= source.type %></code>
+            <% } else { %>
+              Para assistir episódios completos, use links próprios ou autorizados.
+            <% } %>
+          </p>
+        </div>
+        <% if(user && source && (source.type === 'mp4' || source.type === 'video' || source.type === 'hls')){ %>
+          <span class="badge text-bg-primary align-self-start">Progresso automático</span>
+        <% } %>
+      </div>
+    </div>
+  </section>
+
+  <section class="card mt-3">
+    <div class="card-body">
+      <h2 class="h6">Formato aceito em <code>data/anime-sources.json</code></h2>
+      <pre class="small mb-0"><code>{
+  "<%= anime.id %>": {
+    "episodes": {
+      "<%= episode.number || episode.id %>": {
+        "title": "<%= episode.title %>",
+        "type": "mp4",
+        "url": "https://seu-servidor/autorizado/ep.mp4"
+      }
+    }
+  }
+}</code></pre>
+    </div>
+  </section>
+</main>
+
+<% if(user){ %>
+<script>
+(() => {
+  const video = document.getElementById('animeVideo');
+  if (!video) return;
+
+  const hlsSrc = video.dataset.hlsSrc;
+  if (hlsSrc) {
+    if (video.canPlayType('application/vnd.apple.mpegurl')) {
+      video.src = hlsSrc;
+    } else if (window.Hls && window.Hls.isSupported()) {
+      const hls = new window.Hls();
+      hls.loadSource(hlsSrc);
+      hls.attachMedia(video);
+    } else {
+      console.warn('HLS não suportado neste navegador.');
+    }
+  }
+
+  const payload = () => ({
+    provider: 'jikan-anime',
+    mangaId: '<%= anime.id %>',
+    mangaTitle: '<%- String(anime.title).replace(/'/g, "\\'") %>',
+    coverUrl: '<%= anime.coverUrl %>',
+    chapterId: '<%= episode.id || episode.number %>',
+    chapterTitle: 'Episódio <%= episode.number || episode.id %> — <%- String(episode.title).replace(/'/g, "\\'") %>',
+    scrollPosition: Math.round(video.currentTime || 0)
+  });
+
+  let timer;
+  const save = () => fetch('/api/progress', {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload()),
+    keepalive: true
+  }).catch(() => {});
+
+  video.addEventListener('loadedmetadata', () => {
+    const saved = Number('<%= progressSeconds || 0 %>');
+    if (saved > 5 && saved < (video.duration || Infinity) - 5) video.currentTime = saved;
+  });
+  video.addEventListener('timeupdate', () => {
+    clearTimeout(timer);
+    timer = setTimeout(save, 2000);
+  });
+  video.addEventListener('pause', save);
+  window.addEventListener('pagehide', save);
+})();
+</script>
+<% } %>
+<%- include('../partials/footer') %>

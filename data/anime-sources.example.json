@@ -1,0 +1,22 @@
+{
+  "21": {
+    "title": "Exemplo de anime pelo ID do MyAnimeList/Jikan",
+    "episodes": {
+      "1": {
+        "title": "Episódio 1 - MP4 autorizado",
+        "type": "mp4",
+        "url": "https://seu-servidor-autorizado.com/animes/exemplo/episodio-1.mp4"
+      },
+      "2": {
+        "title": "Episódio 2 - HLS autorizado",
+        "type": "hls",
+        "url": "https://seu-servidor-autorizado.com/animes/exemplo/episodio-2/master.m3u8"
+      },
+      "3": {
+        "title": "Episódio 3 - Embed autorizado",
+        "type": "embed",
+        "url": "https://player-oficial-autorizado.com/embed/episodio-3"
+      }
+    }
+  }
+}
