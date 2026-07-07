@@ -9,7 +9,9 @@
     "start": "node src/server.js",
     "check": "node --check src/server.js"
   },
-  "engines": { "node": ">=20" },
+  "engines": {
+    "node": "20.20.2"
+  },
   "dependencies": {
     "bcryptjs": "^2.4.3",
     "better-sqlite3": "^11.8.1",
