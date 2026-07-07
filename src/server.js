@@ -5,7 +5,7 @@ const SQLiteStore = require('connect-sqlite3')(session);
 const helmet = require('helmet');
 
 const env = require('./config/env');
-const db = require('./config/database');
+require('./config/database');
 
 const authRoutes = require('./routes/authRoutes');
 const apiRoutes = require('./routes/apiRoutes');
