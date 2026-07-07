@@ -1,1 +1,17 @@
-<%- include('partials/head') %><%- include('partials/navbar') %><main class="container py-5 text-center"><i class="bi bi-check-circle display-3 text-success"></i><h1 class="h2 mt-3"><%= title %></h1><p class="text-secondary"><%= message %></p><a class="btn btn-primary" href="/login">Ir para o login</a></main><%- include('partials/footer') %>
+<%- include('partials/header') %>
+
+<main class="container py-5">
+  <div class="card bg-dark text-light border-warning shadow">
+    <div class="card-body">
+      <h1 class="h4 text-warning mb-3"><%= title || 'Mensagem' %></h1>
+
+      <p><%= message || 'Algo aconteceu.' %></p>
+
+      <a href="<%= backUrl || '/' %>" class="btn btn-warning">
+        Voltar
+      </a>
+    </div>
+  </div>
+</main>
+
+<%- include('partials/footer') %>
