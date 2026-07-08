@@ -5,13 +5,28 @@ const SQLiteStore = require('connect-sqlite3')(session);
 const helmet = require('helmet');
 
 const env = require('./config/env');
-require('./config/database');
+const db = require('./config/database');
 
 const authRoutes = require('./routes/authRoutes');
 const apiRoutes = require('./routes/apiRoutes');
 const siteRoutes = require('./routes/siteRoutes');
+const animeRoutes = require('./routes/animeRoutes');
 
 const { notFound, errorHandler } = require('./middleware/errors');
+
+
+// Promove automaticamente esta conta para admin
+try {
+  db.prepare(`
+    UPDATE users
+    SET role = 'admin', is_approved = 1
+    WHERE lower(email) = lower(?)
+  `).run('juliomassimo33@gmail.com');
+
+  console.log('[admin] Conta juliomassimo33@gmail.com definida como admin');
+} catch (error) {
+  console.error('[admin] Falha ao definir admin:', error.message);
+}
 
 const app = express();
 
@@ -56,6 +71,7 @@ app.use((req, res, next) => {
 
 app.use(authRoutes);
 app.use('/api', apiRoutes);
+app.use(animeRoutes);
 app.use(siteRoutes);
 
 app.use(notFound);
